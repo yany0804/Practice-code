@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="css/login.css">
+    <link href="layui/css/layui.css" rel="stylesheet" />
+    <script type="text/javascript" src="js/jquery.min.js"></script>
+    <script type="text/javascript" src="layui/layui.js"></script>
+</head>
+<body class="login-bg">
+<canvas id="fullstarbg">你的浏览器不支持canvas标签</canvas>
+<div class="login">
+    <div class="message">易购后台系统登录</div>
+    <div id="darkbannerwrap"></div>
+    <form method="post" id="fmLogin" class="layui-form" onsubmit="return false;">
+
+        <input name="uname" placeholder="用户名" id="un" type="text" lay-verify="required" class="layui-input">
+        <hr class="hr15">
+        <input name="pwd" lay-verify="required" placeholder="密码" type="password" class="layui-input">
+        <hr class="hr15">
+        <input value="登录" lay-submit lay-filter="login" style="width:100%;" type="submit">
+        <hr class="hr20">
+    </form>
+</div>
+
+<script>
+    layui.use(['form'], function(){
+        $=layui.jquery;
+        var form =layui.form,
+            layer=layui.layer;
+
+        form.on('submit(login)', function(data){
+            $.post("user/login",data.field,function (res){
+                if(res.code==0){
+                    layer.msg("登录成功");
+                    sessionStorage.setItem("user",res.msg);
+                    //跳转到index页面
+                    location.href="index.html";
+                }else{
+                    layer.msg(res.msg);
+                }
+            },"json");
+            return false; //阻止表单跳转。如果需要表单跳转，去掉这段即可。
+        });
+
+    });
+</script>
+</body>
+
+
+</html>

@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>推荐页面</title>
+    <link href="layui/css/layui.css" rel="stylesheet" />
+    <script type="text/javascript" src="js/jquery.min.js"></script>
+    <script type="text/javascript" src="layui/layui.js"></script>
+    <style>
+        .layui-table-cell {
+            height: auto !important;
+            line-height: 28px;
+            padding: 6px 15px;
+            position: relative;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            box-sizing: border-box;
+        }
+    </style>
+</head>
+<body>
+<div class="layui-form-item">
+    <form class="layui-form" action="">
+        <div class="layui-inline">
+            <label class="layui-form-label">位置</label>
+            <div class="layui-input-inline" >
+                <select name="sid" id="sid" lay-verify="required">
+                </select>
+            </div>
+        </div>
+        <button class="layui-btn" lay-submit lay-filter="search">搜索</button>
+    </form>
+</div>
+<table id="demo" lay-filter="test"></table>
+<script type="text/html" id="toolEventDemo">
+    <a class="layui-btn layui-btn-xs" lay-event="edit">编辑</a>
+    <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
+</script>
+
+<!-- 修改推荐div开始 -->
+<div style="display: none;" id="tuijian">
+    <form method="post" class="layui-form" id="update" lay-filter="tuijian">
+        <input type="hidden" name="id">
+        <input type="hidden" name="pid" id="pid">
+        <input type="hidden" name="oldsid" id="oldsid">
+        <div class="layui-form-item">
+            <label class="layui-form-label">权重值</label>
+            <div class="layui-input-inline" >
+                <input type="number" name="weigth" class="layui-input">
+            </div>
+            <label class="layui-form-label">位置</label>
+            <div class="layui-input-inline" >
+                <!-- name可重复，id不行-->
+                <select name="sid" id="sid2" lay-verify="required">
+                </select>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-input-block">
+                <button class="layui-btn" lay-submit lay-filter="updateBtn">立即提交</button>
+                <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+            </div>
+        </div>
+    </form>
+</div>
+<!-- 推荐div结束 -->
+</body>
+
+<script>
+    layui.use(['table','form'], function(){
+        var table = layui.table,
+        form =layui.form,
+        $=layui.$;
+
+        $.post("recommentsite/getList",function (res){
+            if(res!=null){
+                $("#sid").empty();
+                $("#sid").append(new Option('请选择',""))
+                $.each(res,function (index,elem){
+                    $("#sid").append(new Option(elem.site,elem.sid));
+                })
+            }else{
+                $("#sid").append(new Option('无数据',""));
+            }
+            form.render();
+        },"json");
+
+        //第一个实例
+        table.render({
+            elem: '#demo'
+            ,height: 520
+            ,url: 'recomment/getRecmts' //数据接口
+            ,page: true //开启分页
+            ,method:"post"
+            ,cols: [[ //表头
+                {checkbox:true}
+                ,{field: 'id', title: 'id', width: 80}
+                ,{templet: "<div><img src='images/{{d.product.mpicture}}'></div>", title: '图片', width: 130}
+                ,{templet: '<div>{{d.product.pname}}</div>', title: '商品名', width: 100}
+                ,{templet: '<div>{{d.recommentsite.site}}</div>', title: '推荐位置', width: 100}
+                ,{field: 'weigth', title: '权重', width: 80}
+                ,{title: '操作', width: 160, templet: '#toolEventDemo'}
+            ]],//这个逗号删除就没有办法显示类别信息了
+            id:"remtTable"
+        });
+
+        //监听搜索按钮重载表格
+        form.on('submit(search)', function(data){
+            table.reload('remtTable', {
+                where:data.field
+            });
+            return false; //阻止表单跳转。如果需要表单跳转，去掉这段即可。
+        });
+
+        //单元格工具事件
+        table.on('tool(test)', function(obj){ // 注：test 是 table 原始标签的属性 lay-filter="对应的值"
+            var data = obj.data; //获得当前行数据
+            var layEvent = obj.event; //获得 lay-event 对应的值（也可以是表头的 event 参数对应的值）
+            var tr = obj.tr; //获得当前行 tr 的 DOM 对象（如果有的话）
+
+            if(layEvent === 'del'){ //删除
+                layer.confirm('确定删除编号为'+data.id+'的推荐信息吗？', function(index){
+                    $.post("recomment/delRcmtById",{"id":data.id},function (res){
+                        if(res.code==0){
+                            layer.msg("删除成功",{time:2000,icon:1},function (){
+                                table.reload('remtTable');
+                                layer.closeAll();
+                            });
+                        }else{
+                            layer.msg(res.msg);
+                        }
+                    },"json");
+                    return false; //阻止表单跳转。如果需要表单跳转，去掉这段即可。
+                });
+            } else if(layEvent === 'edit'){ //编辑
+                form.val('tuijian',data);//赋值
+                $("#oldsid").val(data.sid);
+                $.post("recommentsite/getList",function (res){
+                    if(res!=null){
+                        $("#sid2").empty();
+                        $("#sid2").append(new Option('请选择',""));
+                        $.each(res,function (index,elem){
+                            $("#sid2").append(new Option(elem.site,elem.sid));
+                            if(elem.sid==data.sid){
+                                $("#sid2").children("option").eq(index+1).attr('selected',true);
+                            }
+                        })
+                    }else{
+                        $("#sid2").append(new Option('无数据',""));
+                    }
+                    form.render();
+                },"json");
+                layer.open({
+                    type: 1,
+                    content: $('#tuijian'),
+                    title:"修改推荐",
+                    area:['650px','400px'],
+                    maxmin:true
+                });
+            }
+        });
+
+        //监听修改按钮重载表格
+        form.on('submit(updateBtn)', function(data){
+            $.post("recomment/updateRcmt",data.field,function (res){
+                if(res.code==0){
+                    layer.msg("修改成功",{time:2000,icon:1},function (){
+                        table.reload('remtTable');
+                        layer.closeAll();
+                    });
+                }else{
+                    layer.msg(res.msg);
+                }
+            },"json");
+            return false; //阻止表单跳转。如果需要表单跳转，去掉这段即可。
+        });
+
+    });
+</script>
+
+</html>

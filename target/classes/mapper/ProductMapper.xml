@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ym.mapper.ProductMapper">
+    <resultMap id="pdt" type="com.ym.entity.Product">
+        <id column="pid" property="pid"></id>
+        <result column="pname" property="pname"/>
+        <result column="cid" property="cid"/>
+        <result column="pintro" property="pintro"/>
+        <result column="ptext" property="ptext"/>
+        <result column="pchoice" property="pchoice"/>
+        <result column="state" property="state"/>
+        <result column="mpicture" property="mpicture"/>
+        <result column="sdop" property="sdop"/>
+        <result column="sexp" property="sexp"/>
+        <result column="sweight" property="sweight"/>
+        <result column="sdrand" property="sdrand"/>
+        <result column="cahng" property="cahng"/>
+        <result column="xprice" property="xprice"/>
+        <result column="yprice" property="yprice"/>
+        <result column="stock" property="stock"/>
+        <result column="taste" property="taste"/>
+        <result column="cid" property="category.cid"/>
+        <result  column="cname" property="category.cname"/>
+    </resultMap>
+
+
+    <select id="getProductByXML" parameterType="map" resultMap="pdt">
+        select p.*,c.cname from product p join category c on p.cid=c.cid
+        <where>
+            <if test="param.pname!=null and param.pname!=''">
+                and p.pname like "%"#{param.pname}"%"
+            </if>
+            <if test="param.cid!=null and param.cid!=''">
+                and p.cid=#{param.cid}
+            </if>
+            <if test="param.state!=null and param.state!=''">
+                and p.state=#{param.state}
+            </if>
+        </where>
+    </select>
+</mapper>

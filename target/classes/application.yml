@@ -1,0 +1,22 @@
+spring:
+  datasource:
+    #    由于字符集不支持，故将utf8m4修改成utf8（不改就显示不了json数据）
+    #    通过访问http://localhost:8888/category/getList验证是否有bug
+    url: jdbc:mysql://localhost:3306/ebuy?useSSL=false&serverTimezone=Asia/Shanghai&characterEncoding=utf8
+    username: root
+    password: password
+    #    这里加上cj就可以显示前端界面了
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+mybatis-plus:
+  type-aliases-package: com.ym.entity
+  mapper-locations: classpath*:mapper/*.xml
+
+logging:
+  level:
+    com:
+      ym:
+        mapper: debug
+
+server:
+  port: 8888

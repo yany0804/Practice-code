@@ -1,0 +1,13 @@
+com\ym\mapper\ProductMapper.class
+com\ym\service\impl\CategoryServiceImpl.class
+com\ym\APP.class
+com\ym\controller\ProductController.class
+com\ym\controller\CategoryController.class
+com\ym\entity\Category.class
+com\ym\service\ICategoryService.class
+com\ym\mapper\CategoryMapper.class
+com\ym\service\IProductService.class
+com\ym\config\MybatisPlusConfig.class
+com\ym\service\impl\ProductServiceImpl.class
+com\ym\utils\Result.class
+com\ym\entity\Product.class
